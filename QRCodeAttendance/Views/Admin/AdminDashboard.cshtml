@@ -1,0 +1,365 @@
+@model QRCodeAttendance.Models.DTOs.Admin.AdminInvitationDashboardDto
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var activeCount = Model.RecentInvitations.Count(i => !i.IsUsed && i.ExpiryDate > DateTime.UtcNow && i.Status.ToString() == "Approved");
+    var usedCount = Model.RecentInvitations.Count(i => i.IsUsed);
+    var expiredCount = Model.RecentInvitations.Count(i => !i.IsUsed && i.ExpiryDate <= DateTime.UtcNow && i.Status.ToString() == "Approved");
+}
+
+<style>
+    .admin-invitation-shell {
+        width: 100vw;
+        min-height: calc(100dvh - var(--portal-header-height) - var(--portal-footer-height));
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        padding: clamp(1rem, 3vw, 2rem);
+        background:
+            linear-gradient(135deg, rgba(3, 7, 18, 0.9), rgba(15, 23, 42, 0.72)),
+            url('/images/attendance-portal-bg.svg') center/cover fixed;
+        color: #0f172a;
+    }
+
+    .admin-dashboard {
+        width: min(1180px, 100%);
+        margin: 0 auto;
+    }
+
+    .admin-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        color: #ffffff;
+    }
+
+    .admin-kicker {
+        margin: 0 0 0.35rem;
+        color: #a7f3d0;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .admin-title {
+        margin: 0;
+        font-size: clamp(1.8rem, 5vw, 3.35rem);
+        font-weight: 900;
+        line-height: 1.04;
+        letter-spacing: 0;
+    }
+
+    .admin-subtitle {
+        max-width: 760px;
+        margin: 0.75rem 0 0;
+        color: rgba(255, 255, 255, 0.76);
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.65;
+    }
+
+    .admin-logout {
+        min-height: 44px;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 8px;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+        font-weight: 800;
+        padding: 0 1rem;
+        backdrop-filter: blur(14px);
+    }
+
+    .admin-logout:hover {
+        color: #0f172a;
+        background: #ffffff;
+    }
+
+    .admin-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .admin-stat,
+    .admin-panel {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 24px 70px rgba(2, 6, 23, 0.28);
+    }
+
+    .admin-stat {
+        padding: 1rem;
+    }
+
+    .admin-stat span {
+        display: block;
+        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .admin-stat strong {
+        display: block;
+        margin-top: 0.25rem;
+        color: #0f172a;
+        font-size: 1.8rem;
+        line-height: 1;
+    }
+
+    .admin-grid {
+        display: block;
+    }
+
+    .admin-panel-header {
+        padding: 1rem 1rem 0.85rem;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .admin-panel-header h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 900;
+    }
+
+    .admin-panel-header p {
+        margin: 0.35rem 0 0;
+        color: #64748b;
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+
+    .admin-panel-body {
+        padding: 1rem;
+    }
+
+    .admin-control {
+        min-height: 48px;
+        border-radius: 8px;
+        border: 1px solid rgba(15, 23, 42, 0.14);
+    }
+
+    .admin-primary-btn {
+        min-height: 48px;
+        border: 0;
+        border-radius: 8px;
+        background: #0f766e;
+        color: #ffffff;
+        font-weight: 900;
+    }
+
+    .admin-primary-btn:hover {
+        background: #115e59;
+        color: #ffffff;
+    }
+
+    .admin-table {
+        margin: 0;
+    }
+
+    .admin-table th {
+        color: #475569;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .admin-table td {
+        vertical-align: middle;
+    }
+
+    .admin-code {
+        display: inline-flex;
+        min-height: 34px;
+        align-items: center;
+        border-radius: 8px;
+        background: #ecfeff;
+        color: #0f766e;
+        font-weight: 900;
+        padding: 0 0.65rem;
+    }
+
+    .admin-whatsapp-btn {
+        display: inline-flex;
+        min-height: 34px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: #16a34a;
+        color: #ffffff;
+        font-size: 0.82rem;
+        font-weight: 900;
+        padding: 0 0.75rem;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .admin-whatsapp-btn:hover {
+        background: #15803d;
+        color: #ffffff;
+    }
+
+    .admin-empty {
+        padding: 2rem 1rem;
+        color: #64748b;
+        text-align: center;
+    }
+
+    .admin-action-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    .admin-action-row .btn {
+        border-radius: 8px;
+        font-weight: 800;
+    }
+
+    .admin-recent {
+        margin-top: 1rem;
+    }
+
+    @@media (max-width: 991.98px) {
+        .admin-hero {
+            grid-template-columns: 1fr;
+        }
+
+        .admin-logout {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 720px) {
+        .admin-invitation-shell {
+            padding: 1rem 0.75rem;
+            background-attachment: scroll;
+        }
+
+        .admin-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .admin-panel-header,
+        .admin-panel-body {
+            padding: 0.9rem;
+        }
+
+        .admin-action-row {
+            justify-content: stretch;
+            flex-direction: column;
+        }
+
+        .admin-action-row form,
+        .admin-action-row .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<section class="admin-invitation-shell">
+<div class="admin-dashboard">
+    <div class="admin-hero">
+        <div>
+            <p class="admin-kicker">Admin Control</p>
+            <h1 class="admin-title">Instructor Invitations</h1>
+            <p class="admin-subtitle">Send secure instructor registration codes by email. Codes are hidden from admins, tied to the instructor email, and expire after 24 hours.</p>
+        </div>
+    </div>
+
+    @if (TempData["Alert"] != null)
+    {
+        var alertType = TempData["AlertType"]?.ToString() ?? "info";
+        <div class="alert alert-@alertType border-0 shadow-sm">
+            @TempData["Alert"]
+        </div>
+    }
+
+    <div class="admin-stats">
+        <div class="admin-stat">
+            <span>Expired Codes</span>
+            <strong>@expiredCount</strong>
+        </div>
+        <div class="admin-stat">
+            <span>Active Codes</span>
+            <strong>@activeCount</strong>
+        </div>
+        <div class="admin-stat">
+            <span>Used Codes</span>
+            <strong>@usedCount</strong>
+        </div>
+    </div>
+
+    <div class="admin-grid">
+        <section class="admin-panel">
+            <div class="admin-panel-header">
+                <h2>Send Instructor Code</h2>
+                <p>Enter the instructor email address.</p>
+            </div>
+
+            <div class="admin-panel-body">
+                <form asp-controller="Admin" asp-action="GenerateInstructorCode" method="post" class="row g-3">
+                    @Html.AntiForgeryToken()
+                    <div class="col-md-9">
+                        <label asp-for="Form.InstructorEmail" class="form-label fw-bold">Instructor email</label>
+                        <input asp-for="Form.InstructorEmail" type="email" class="form-control admin-control" placeholder="instructor@mitc.edu.ng" autocomplete="email" />
+                        <span asp-validation-for="Form.InstructorEmail" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn admin-primary-btn w-100">Send Code</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <section class="admin-panel admin-recent">
+        <div class="admin-panel-header">
+            <h2>Recent Invitations</h2>
+            <p> Each code can only be used with the email address it was generated for.</p>
+        </div>
+
+        @if (Model.RecentInvitations.Any())
+        {
+            <div class="table-responsive">
+                <table class="table admin-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Sent</th>
+                            <th>Expires</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var invitation in Model.RecentInvitations)
+                        {
+                            var expired = invitation.ExpiryDate <= DateTime.UtcNow;
+                            var badgeClass = invitation.Status.ToString() == "Rejected" ? "bg-danger" : invitation.IsUsed ? "bg-secondary" : expired ? "bg-warning text-dark" : "bg-success";
+                            var status = invitation.Status.ToString() == "Rejected" ? "Email Failed" : invitation.IsUsed ? "Used" : expired ? "Expired" : "Active";
+
+                            <tr>
+                                <td class="fw-bold">@invitation.InstructorEmail</td>
+                                <td>@invitation.CreatedDate.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</td>
+                                <td>@invitation.ExpiryDate.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</td>
+                                <td><span class="badge @badgeClass rounded-pill px-3">@status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="admin-empty">No instructor invitation codes have been generated yet.</div>
+        }
+    </section>
+</div>
+</section>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+}

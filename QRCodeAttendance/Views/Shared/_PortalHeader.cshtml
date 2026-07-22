@@ -1,0 +1,57 @@
+@using Microsoft.Extensions.Localization
+@using QRCodeAttendance
+@inject IStringLocalizer<SharedResource> Localizer
+
+<header class="app-shell-header" role="banner">
+    <div class="app-shell-header__inner">
+        <a class="app-shell-brand" asp-controller="Home" asp-action="Index" aria-label="MITC QRCode Attendance home">
+            <span class="app-shell-brand__mark" aria-hidden="true">
+                <img src="~/images/mitc-logo.jpg" asp-append-version="true" alt="" />
+            </span>
+            <span class="app-shell-brand__text">
+                <span class="app-shell-brand__title" data-marquee="Masroor International Technical College">Masroor International Technical College</span>
+                <span class="app-shell-brand__subtitle">QR Code Attendance</span>
+            </span>
+        </a>
+
+        <button class="app-shell-nav-toggle" type="button" aria-controls="appShellNav" aria-expanded="false">
+            <span class="app-shell-nav-toggle__bar"></span>
+            <span class="app-shell-nav-toggle__bar"></span>
+            <span class="app-shell-nav-toggle__bar"></span>
+            <span class="visually-hidden">@Localizer["ToggleNavigation"]</span>
+        </button>
+
+        <nav class="app-shell-nav" id="appShellNav" aria-label="Primary navigation">
+            <a asp-controller="Home" asp-action="Index">@Localizer["Home"]</a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <form asp-controller="User" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="app-shell-nav__logout">Logout</button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="User" asp-action="Login">@Localizer["Login"]</a>
+            }
+            <a asp-controller="Student" asp-action="RegisterStudent">@Localizer["Student"]</a>
+            <a asp-controller="Instructor" asp-action="RegisterInstructor">@Localizer["Instructor"]</a>
+        </nav>
+    </div>
+</header>
+
+<script>
+    (() => {
+        const toggle = document.querySelector(".app-shell-nav-toggle");
+        const nav = document.getElementById("appShellNav");
+
+        if (!toggle || !nav) {
+            return;
+        }
+
+        toggle.addEventListener("click", () => {
+            const isOpen = nav.classList.toggle("is-open");
+            toggle.setAttribute("aria-expanded", isOpen.toString());
+        });
+    })();
+</script>
